@@ -70,7 +70,7 @@ class App extends Component<Props, State> {
       <div>
         <nav className="navbar navbar-expand navbar-dark bg-dark">
           <Link to={"/"} className="navbar-brand">
-            bezKoder
+            TodoNow
           </Link>
           <div className="navbar-nav mr-auto">
             <li className="nav-item">
@@ -97,8 +97,8 @@ class App extends Component<Props, State> {
 
             {currentUser && (
               <li className="nav-item">
-                <Link to={"/user"} className="nav-link">
-                  User
+                <Link to={"/todos"} className="nav-link">
+                  Todos
                 </Link>
               </li>
             )}
@@ -141,7 +141,7 @@ class App extends Component<Props, State> {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/user" element={<BoardUser />} />
+            <Route path="/todos" element={<BoardUser />} />
             <Route path="/mod" element={<BoardModerator />} />
             <Route path="/admin" element={<BoardAdmin />} />
           </Routes>
