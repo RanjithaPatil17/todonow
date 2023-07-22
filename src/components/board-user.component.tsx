@@ -2,37 +2,39 @@ import { Component } from "react";
 
 import UserService from "../services/user.service";
 import EventBus from "../common/EventBus";
+import TasksColumn from "./todo/tasks.column";
+import Board from "./todo/board";
 
 type Props = {};
 
 type State = {
   content: string;
-}
+};
 
 export default class BoardUser extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      content: ""
+      content: "",
     };
   }
 
   componentDidMount() {
     UserService.getUserBoard().then(
-      response => {
+      (response) => {
         this.setState({
-          content: response.data
+          content: response.data,
         });
       },
-      error => {
+      (error) => {
         this.setState({
           content:
             (error.response &&
               error.response.data &&
               error.response.data.message) ||
             error.message ||
-            error.toString()
+            error.toString(),
         });
 
         if (error.response && error.response.status === 401) {
@@ -44,10 +46,12 @@ export default class BoardUser extends Component<Props, State> {
 
   render() {
     return (
-      <div className="container">
-        <header className="jumbotron">
-          <h3>{this.state.content}</h3>
-        </header>
+      <div className="container text-center">
+        <div className="row align-items-start">
+          <div className="col">
+            <Board Name=""/>
+            </div>
+        </div>
       </div>
     );
   }

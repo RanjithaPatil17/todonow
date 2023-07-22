@@ -1,0 +1,158 @@
+import React, { useState,FC,ReactElement
+ } from 'react';
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+} from 'react-beautiful-dnd';
+
+interface Item {
+  id: string;
+  content: string;
+}
+
+const getItems = (count: number, offset = 0): Item[] =>
+  Array.from({ length: count }, (_v, k) => k).map((k: number) => ({
+    id: `item-${k + offset}-${new Date().getTime()}`,
+    content: `item ${k + offset}`,
+  }));
+
+const reorder = <T extends unknown>(list: T[], startIndex: number, endIndex: number): T[] => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+  return result;
+};
+
+const grid = 8;
+
+const getItemStyle = (isDragging: boolean, draggableStyle: any): React.CSSProperties => ({
+  userSelect: 'none',
+  padding: grid * 2,
+  margin: `0 0 ${grid}px 0`,
+  background: isDragging ? 'lightgreen' : 'grey',
+  ...draggableStyle,
+});
+
+const getListStyle = (isDraggingOver: boolean): React.CSSProperties => ({
+  background: isDraggingOver ? 'lightblue' : 'lightgrey',
+  padding: grid,
+  width: 250,
+});
+
+type Props = {
+  Name: string;
+}
+
+
+// const TasksColumn: FC<ChildProps> = ({ Name }): ReactElement => 
+ const Board: FC<Props> = ({ Name }): ReactElement =>  {
+  const [state, setState] = useState<Item[][]>([getItems(10), getItems(5, 10)]);
+
+  const onDragEnd = (result: DropResult): void => {
+    const { source, destination } = result;
+
+    // dropped outside the list
+    if (!destination) {
+      return;
+    }
+
+    const sInd = +source.droppableId;
+    const dInd = +destination.droppableId;
+
+    if (sInd === dInd) {
+      const items = reorder(state[sInd], source.index, destination.index);
+      const newState = [...state];
+      newState[sInd] = items;
+      setState(newState);
+    } else {
+      const result = move(state[sInd], state[dInd], source, destination);
+      const newState = [...state];
+      newState[sInd] = result[sInd];
+      newState[dInd] = result[dInd];
+
+      setState(newState.filter(group => group.length));
+    }
+  };
+
+  const move = (source: Item[], destination: Item[], droppableSource: any, droppableDestination: any): any => {
+    const sourceClone = Array.from(source);
+    const destClone = Array.from(destination);
+    const [removed] = sourceClone.splice(droppableSource.index, 1);
+
+    destClone.splice(droppableDestination.index, 0, removed);
+
+    const result: { [key: string]: Item[] } = {};
+    result[droppableSource.droppableId] = sourceClone;
+    result[droppableDestination.droppableId] = destClone;
+
+    return result;
+  };
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => {
+          setState([...state, []]);
+        }}
+      >
+        Add new group
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setState([...state, getItems(1)]);
+        }}
+      >
+        Add new item
+      </button>
+      <div style={{ display: 'flex' }}>
+        <DragDropContext onDragEnd={onDragEnd}>
+          {state.map((el, ind) => (
+            <Droppable key={ind} droppableId={`${ind}`}>
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  style={getListStyle(snapshot.isDraggingOver)}
+                  {...provided.droppableProps}
+                >
+                  {el.map((item, index) => (
+                    <Draggable key={item.id} draggableId={item.id} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+                            {item.content}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newState = [...state];
+                                newState[ind].splice(index, 1);
+                                setState(newState.filter(group => group.length));
+                              }}
+                            >
+                              complete
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          ))}
+        </DragDropContext>
+      </div>
+    </div>
+  );
+}
+
+export default Board;
