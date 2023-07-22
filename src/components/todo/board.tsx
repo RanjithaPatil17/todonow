@@ -9,6 +9,7 @@ import {
   Droppable,
   DropResult,
 } from 'react-beautiful-dnd';
+import Item from './item';
 
 export interface Item {
   _id: string;
@@ -24,14 +25,14 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any): React.CSSProper
   userSelect: 'none',
   padding: grid * 2,
   margin: `0 0 ${grid}px 0`,
-  background: isDragging ? 'lightgreen' : 'grey',
+  background: isDragging ? 'lightgreen' : '',
   ...draggableStyle,
 });
 
 const getListStyle = (isDraggingOver: boolean): React.CSSProperties => ({
-  background: isDraggingOver ? 'lightblue' : 'lightgrey',
+  background: isDraggingOver ? 'lightblue' : '',
   padding: grid,
-  width: 250,
+  width: 600,
 });
 
 type Props = {
@@ -108,6 +109,31 @@ type Props = {
       </ReactModal>
       <div style={{ display: 'flex' }}>
         <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable key={"pending"} droppableId={"pending"} >
+            {(provided, snapshot) => (
+             <div
+                  ref={provided.innerRef}
+                  style={getListStyle(snapshot.isDraggingOver)}
+                  {...provided.droppableProps}
+              >
+                {pending.map((item, index) => (
+                    <Draggable key={item._id} draggableId={item._id} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+                        >
+                        <Item content={item.content} _id={item._id} completed={false} />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+
+              </div>
+            )}
+          </Droppable>
           <Droppable key={"completed"} droppableId={"completed"} >
             {
               (provided, snapshot) => (
@@ -125,19 +151,7 @@ type Props = {
                           {...provided.dragHandleProps}
                           style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
                         >
-                          <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-                            {item.content}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newState = [...state];
-                                // newState[ind].splice(index, 1);
-                                setState(newState.filter(group => group.length));
-                              }}
-                            >
-                              complete
-                            </button>
-                          </div>
+                        <Item content={item.content} _id={item._id} completed={true} />
                         </div>
                       )}
                     </Draggable>
@@ -145,43 +159,6 @@ type Props = {
               </div>
               )
             }
-          </Droppable>
-          <Droppable key={"pending"} droppableId={"pending"} >
-            {(provided, snapshot) => (
-             <div
-                  ref={provided.innerRef}
-                  style={getListStyle(snapshot.isDraggingOver)}
-                  {...provided.droppableProps}
-              >
-                {pending.map((item, index) => (
-                    <Draggable key={item._id} draggableId={item._id} index={index}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-                            {item.content}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newState = [...state];
-                                // newState[ind].splice(index, 1);
-                                setState(newState.filter(group => group.length));
-                              }}
-                            >
-                              complete
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-
-              </div>
-            )}
           </Droppable>
         </DragDropContext>
       </div>

@@ -1,16 +1,19 @@
-import React, { useState,FC,ReactElement, useEffect
-} from 'react';
-import ReactModal from 'react-modal';
+import React, { FC, ReactElement } from 'react';
 
 type Props = {
-    content: string;
-    id: string;
-}
+  content: string;
+  _id: string;
+  completed: boolean;
+};
 
-const Board: FC<Props> = ({ content, id }): ReactElement => {
-    return (
-        <div>
-            {content + " " + id}
-        </div>
-    )
-}
+const Item: FC<Props> = ({ content, _id, completed }): ReactElement => {
+  const itemClass = `board-item ${completed ? 'completed' : 'not-completed'}`;
+
+  return (
+    <div className={itemClass}>
+      {content} {_id}
+    </div>
+  );
+};
+
+export default Item;

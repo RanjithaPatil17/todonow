@@ -30,3 +30,21 @@ label {
   -webkit-border-radius: 50%;
   border-radius: 50%;
 }
+
+/* styles.css (or any other CSS file) */
+.board-item {
+  /* Add other common styles here */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 20px; /* Rounded corners */
+}
+
+.board-item.completed {
+  /* Add styles for completed items */
+  background-color: lightgreen; /* Green background for completed items */
+}
+
+.board-item.not-completed {
+  /* Add styles for not completed items */
+  background-color: rgb(241, 134, 134); /* Red background for not completed items */
+}
