@@ -41,7 +41,7 @@ label {
 
 .board-item.completed {
   /* Add styles for completed items */
-  background-color: lightgreen; /* Green background for completed items */
+  background-color: rgb(156, 144, 238); /* Green background for completed items */
 }
 
 .board-item.not-completed {
