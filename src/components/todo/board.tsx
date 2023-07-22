@@ -1,38 +1,36 @@
-import React, { useState,FC,ReactElement, useEffect
-} from 'react';
-import ReactModal from 'react-modal';
+import React, { useState, FC, ReactElement, useEffect } from "react";
+import ReactModal from "react-modal";
 
 import {
-  
   DragDropContext,
   Draggable,
   Droppable,
   DropResult,
-} from 'react-beautiful-dnd';
-import Item from './item';
+} from "react-beautiful-dnd";
+import Item from "./item";
 
 export interface Item {
   _id: string;
   content: string;
 }
 
-
-
-
 const grid = 8;
 
-const getItemStyle = (isDragging: boolean, draggableStyle: any): React.CSSProperties => ({
-  userSelect: 'none',
+const getItemStyle = (
+  isDragging: boolean,
+  draggableStyle: any
+): React.CSSProperties => ({
+  userSelect: "none",
   padding: grid * 2,
   margin: `0 0 ${grid}px 0`,
-  background: isDragging ? 'lightgreen' : '',
+  background: isDragging ? "" : "",
   ...draggableStyle,
 });
 
 const getListStyle = (isDraggingOver: boolean): React.CSSProperties => ({
-  background: isDraggingOver ? 'lightblue' : '',
+  background: isDraggingOver ? "lightblue" : "",
   padding: grid,
-  width: 600,
+  // width: 600,
 });
 
 type Props = {
@@ -40,22 +38,26 @@ type Props = {
   PendingItems: Item[];
   New: (params: any) => any;
   Update: (id: string, index: any, destination: any) => any;
-}
+};
 
-
-// const TasksColumn: FC<ChildProps> = ({ Name }): ReactElement => 
- const Board: FC<Props> = ({ CompletedItems,PendingItems, New, Update }): ReactElement =>  {
-   const [state, setState] = useState<Item[][]>([]);
-   const [completed, setCompleted] = useState<Item[]>([]);
-   const [pending, setPending] = useState<Item[]>([]);
+// const TasksColumn: FC<ChildProps> = ({ Name }): ReactElement =>
+const Board: FC<Props> = ({
+  CompletedItems,
+  PendingItems,
+  New,
+  Update,
+}): ReactElement => {
+  const [state, setState] = useState<Item[][]>([]);
+  const [completed, setCompleted] = useState<Item[]>([]);
+  const [pending, setPending] = useState<Item[]>([]);
 
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-   const [inputText, setInputText] = useState<string>('');
-   
-   useEffect(() => {
-     setCompleted(CompletedItems);
-      setPending(PendingItems);
-    }, [CompletedItems, PendingItems]);
+  const [inputText, setInputText] = useState<string>("");
+
+  useEffect(() => {
+    setCompleted(CompletedItems);
+    setPending(PendingItems);
+  }, [CompletedItems, PendingItems]);
 
   const onDragEnd = (result: DropResult): void => {
     const { source, destination } = result;
@@ -69,101 +71,132 @@ type Props = {
     Update(result.draggableId, dstIndex, destinationId);
   };
 
-   
   return (
-    <div>
-           <button type="button" onClick={() => setIsDialogOpen(true)}>
-        Add new item
-      </button>
-
-      <ReactModal
-        isOpen={isDialogOpen}
-        onRequestClose={() => setIsDialogOpen(false)}
-        contentLabel="Example Modal"
-      >
-        <h2>Add new item</h2>
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-        />
-        <button
-          type="button"
-          onClick={() => {
-            // Handle dialog box submission here
-            // You can access the input text using `inputText` state
-            // Do any processing or actions based on the user input
-            console.log('User input:', inputText);
-            New(inputText);
-            setInputText('');
-            // Close the dialog box after handling the input
-            
-            setIsDialogOpen(false);
-          }}
+    <div className="container">
+      <div className="row">
+        <div className="col-3">
+          <button type="button" onClick={() => setIsDialogOpen(true)}>
+            Add new item
+          </button>
+        </div>
+        <ReactModal
+          isOpen={isDialogOpen}
+          onRequestClose={() => setIsDialogOpen(false)}
+          contentLabel="Example Modal"
         >
-          Submit
-        </button>
-        <button type="button" onClick={() => setIsDialogOpen(false)}>
-          Cancel
-        </button>
-      </ReactModal>
-      <div style={{ display: 'flex' }}>
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable key={"pending"} droppableId={"pending"} >
-            {(provided, snapshot) => (
-             <div
-                  ref={provided.innerRef}
-                  style={getListStyle(snapshot.isDraggingOver)}
-                  {...provided.droppableProps}
-              >
-                {pending.map((item, index) => (
-                    <Draggable key={item._id} draggableId={item._id} index={index}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
-                        >
-                        <Item content={item.content} _id={item._id} completed={false} />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
+          <h2>Add new item</h2>
+          <input
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              // Handle dialog box submission here
+              // You can access the input text using `inputText` state
+              // Do any processing or actions based on the user input
+              console.log("User input:", inputText);
+              New(inputText);
+              setInputText("");
+              // Close the dialog box after handling the input
 
-              </div>
-            )}
-          </Droppable>
-          <Droppable key={"completed"} droppableId={"completed"} >
-            {
-              (provided, snapshot) => (
-               <div
-                  ref={provided.innerRef}
-                  style={getListStyle(snapshot.isDraggingOver)}
-                  {...provided.droppableProps}
-              >
-                {completed.map((item, index) => (
-                    <Draggable key={item._id} draggableId={item._id} index={index}>
+              setIsDialogOpen(false);
+            }}
+          >
+            Submit
+          </button>
+          <button type="button" onClick={() => setIsDialogOpen(false)}>
+            Cancel
+          </button>
+        </ReactModal>
+        <div className="col-7">
+          <div style={{ display: "flex" }}>
+            <div className="container text-center">
+              <DragDropContext onDragEnd={onDragEnd}>
+                <div className="row align-items-start">
+                  <div className="col">
+                    <Droppable key={"pending"} droppableId={"pending"}>
                       {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+                          style={getListStyle(snapshot.isDraggingOver)}
+                          {...provided.droppableProps}
                         >
-                        <Item content={item.content} _id={item._id} completed={true} />
+                          {pending.map((item, index) => (
+                            <Draggable
+                              key={item._id}
+                              draggableId={item._id}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  style={getItemStyle(
+                                    snapshot.isDragging,
+                                    provided.draggableProps.style
+                                  )}
+                                >
+                                  <Item
+                                    content={item.content}
+                                    _id={item._id}
+                                    completed={false}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
                         </div>
                       )}
-                    </Draggable>
-                  ))}
-              </div>
-              )
-            }
-          </Droppable>
-        </DragDropContext>
+                    </Droppable>
+                  </div>
+                  <div className="col">
+                    <Droppable key={"completed"} droppableId={"completed"}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          style={getListStyle(snapshot.isDraggingOver)}
+                          {...provided.droppableProps}
+                        >
+                          {completed.map((item, index) => (
+                            <Draggable
+                              key={item._id}
+                              draggableId={item._id}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  style={getItemStyle(
+                                    snapshot.isDragging,
+                                    provided.draggableProps.style
+                                  )}
+                                >
+                                  <Item
+                                    content={item.content}
+                                    _id={item._id}
+                                    completed={true}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                        </div>
+                      )}
+                    </Droppable>
+                  </div>
+                </div>
+              </DragDropContext>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default Board;

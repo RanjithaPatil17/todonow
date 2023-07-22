@@ -10,8 +10,11 @@ const Item: FC<Props> = ({ content, _id, completed }): ReactElement => {
   const itemClass = `board-item ${completed ? 'completed' : 'not-completed'}`;
 
   return (
-    <div className={itemClass}>
-      {content} {_id}
+      <div className={itemClass}>
+          {
+            
+                completed ? <s>{content}</s> : content
+         }
     </div>
   );
 };
