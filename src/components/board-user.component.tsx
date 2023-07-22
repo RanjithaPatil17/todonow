@@ -2,13 +2,14 @@ import { Component } from "react";
 
 import UserService from "../services/user.service";
 import EventBus from "../common/EventBus";
-import TasksColumn from "./todo/tasks.column";
-import Board from "./todo/board";
+import Board, {Item} from "./todo/board";
+import TodoService from "../services/todo.service";
 
 type Props = {};
 
 type State = {
-  content: string;
+  completed: Item[];
+  pending: Item[];
 };
 
 export default class BoardUser extends Component<Props, State> {
@@ -16,26 +17,36 @@ export default class BoardUser extends Component<Props, State> {
     super(props);
 
     this.state = {
-      content: "",
+      completed: [],
+      pending: [],
     };
   }
 
-  componentDidMount() {
-    UserService.getUserBoard().then(
+
+
+  fetchTodoList() {
+    TodoService.getTodoList().then(
       (response) => {
-        this.setState({
-          content: response.data,
-        });
+        if (response.data.completed) {
+          this.setState({
+            completed: response.data.completed,
+          });
+        }
+        if (response.data.pending) {
+          this.setState({
+            pending: response.data.pending,
+          });
+        }
       },
       (error) => {
-        this.setState({
-          content:
-            (error.response &&
-              error.response.data &&
-              error.response.data.message) ||
-            error.message ||
-            error.toString(),
-        });
+        // this.setState({
+        //   content:
+        //     (error.response &&
+        //       error.response.data &&
+        //       error.response.data.message) ||
+        //     error.message ||
+        //     error.toString(),
+        // });
 
         if (error.response && error.response.status === 401) {
           EventBus.dispatch("logout");
@@ -44,12 +55,46 @@ export default class BoardUser extends Component<Props, State> {
     );
   }
 
+    AddNew = (content :string) => {
+    TodoService.createTodo({
+      content: content,
+    }).then((resp) => {
+      this.fetchTodoList();
+    }
+    );
+    }
+  
+  Update = (id: string, index: any, destination: any) => {
+    TodoService.updateTodo(
+      id,
+      {
+        index: index,
+        destination: destination,
+      },
+    ).then((resp) => {
+      this.fetchTodoList();
+    }
+    );
+  }
+  componentDidMount() {
+    this.fetchTodoList();
+  }
+
   render() {
     return (
       <div className="container text-center">
         <div className="row align-items-start">
           <div className="col">
-            <Board Name=""/>
+            <Board 
+              CompletedItems={this.state.completed}
+              PendingItems={this.state.pending}
+              New={
+                this.AddNew
+            }
+              Update={
+                this.Update
+              }
+            />
             </div>
         </div>
       </div>

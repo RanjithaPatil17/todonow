@@ -1,29 +1,22 @@
-import React, { useState,FC,ReactElement
- } from 'react';
+import React, { useState,FC,ReactElement, useEffect
+} from 'react';
+import ReactModal from 'react-modal';
+
 import {
+  
   DragDropContext,
   Draggable,
   Droppable,
   DropResult,
 } from 'react-beautiful-dnd';
 
-interface Item {
-  id: string;
+export interface Item {
+  _id: string;
   content: string;
 }
 
-const getItems = (count: number, offset = 0): Item[] =>
-  Array.from({ length: count }, (_v, k) => k).map((k: number) => ({
-    id: `item-${k + offset}-${new Date().getTime()}`,
-    content: `item ${k + offset}`,
-  }));
 
-const reorder = <T extends unknown>(list: T[], startIndex: number, endIndex: number): T[] => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-  return result;
-};
+
 
 const grid = 8;
 
@@ -42,13 +35,26 @@ const getListStyle = (isDraggingOver: boolean): React.CSSProperties => ({
 });
 
 type Props = {
-  Name: string;
+  CompletedItems: Item[];
+  PendingItems: Item[];
+  New: (params: any) => any;
+  Update: (id: string, index: any, destination: any) => any;
 }
 
 
 // const TasksColumn: FC<ChildProps> = ({ Name }): ReactElement => 
- const Board: FC<Props> = ({ Name }): ReactElement =>  {
-  const [state, setState] = useState<Item[][]>([getItems(10), getItems(5, 10)]);
+ const Board: FC<Props> = ({ CompletedItems,PendingItems, New, Update }): ReactElement =>  {
+   const [state, setState] = useState<Item[][]>([]);
+   const [completed, setCompleted] = useState<Item[]>([]);
+   const [pending, setPending] = useState<Item[]>([]);
+
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+   const [inputText, setInputText] = useState<string>('');
+   
+   useEffect(() => {
+     setCompleted(CompletedItems);
+      setPending(PendingItems);
+    }, [CompletedItems, PendingItems]);
 
   const onDragEnd = (result: DropResult): void => {
     const { source, destination } = result;
@@ -57,69 +63,61 @@ type Props = {
     if (!destination) {
       return;
     }
-
-    const sInd = +source.droppableId;
-    const dInd = +destination.droppableId;
-
-    if (sInd === dInd) {
-      const items = reorder(state[sInd], source.index, destination.index);
-      const newState = [...state];
-      newState[sInd] = items;
-      setState(newState);
-    } else {
-      const result = move(state[sInd], state[dInd], source, destination);
-      const newState = [...state];
-      newState[sInd] = result[sInd];
-      newState[dInd] = result[dInd];
-
-      setState(newState.filter(group => group.length));
-    }
+    var dstIndex = destination.index;
+    var destinationId = destination.droppableId;
+    Update(result.draggableId, dstIndex, destinationId);
   };
 
-  const move = (source: Item[], destination: Item[], droppableSource: any, droppableDestination: any): any => {
-    const sourceClone = Array.from(source);
-    const destClone = Array.from(destination);
-    const [removed] = sourceClone.splice(droppableSource.index, 1);
-
-    destClone.splice(droppableDestination.index, 0, removed);
-
-    const result: { [key: string]: Item[] } = {};
-    result[droppableSource.droppableId] = sourceClone;
-    result[droppableDestination.droppableId] = destClone;
-
-    return result;
-  };
-
+   
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => {
-          setState([...state, []]);
-        }}
-      >
-        Add new group
-      </button>
-      <button
-        type="button"
-        onClick={() => {
-          setState([...state, getItems(1)]);
-        }}
-      >
+           <button type="button" onClick={() => setIsDialogOpen(true)}>
         Add new item
       </button>
+
+      <ReactModal
+        isOpen={isDialogOpen}
+        onRequestClose={() => setIsDialogOpen(false)}
+        contentLabel="Example Modal"
+      >
+        <h2>Add new item</h2>
+        <input
+          type="text"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+        />
+        <button
+          type="button"
+          onClick={() => {
+            // Handle dialog box submission here
+            // You can access the input text using `inputText` state
+            // Do any processing or actions based on the user input
+            console.log('User input:', inputText);
+            New(inputText);
+            setInputText('');
+            // Close the dialog box after handling the input
+            
+            setIsDialogOpen(false);
+          }}
+        >
+          Submit
+        </button>
+        <button type="button" onClick={() => setIsDialogOpen(false)}>
+          Cancel
+        </button>
+      </ReactModal>
       <div style={{ display: 'flex' }}>
         <DragDropContext onDragEnd={onDragEnd}>
-          {state.map((el, ind) => (
-            <Droppable key={ind} droppableId={`${ind}`}>
-              {(provided, snapshot) => (
-                <div
+          <Droppable key={"completed"} droppableId={"completed"} >
+            {
+              (provided, snapshot) => (
+               <div
                   ref={provided.innerRef}
                   style={getListStyle(snapshot.isDraggingOver)}
                   {...provided.droppableProps}
-                >
-                  {el.map((item, index) => (
-                    <Draggable key={item.id} draggableId={item.id} index={index}>
+              >
+                {completed.map((item, index) => (
+                    <Draggable key={item._id} draggableId={item._id} index={index}>
                       {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
@@ -133,7 +131,7 @@ type Props = {
                               type="button"
                               onClick={() => {
                                 const newState = [...state];
-                                newState[ind].splice(index, 1);
+                                // newState[ind].splice(index, 1);
                                 setState(newState.filter(group => group.length));
                               }}
                             >
@@ -144,11 +142,47 @@ type Props = {
                       )}
                     </Draggable>
                   ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          ))}
+              </div>
+              )
+            }
+          </Droppable>
+          <Droppable key={"pending"} droppableId={"pending"} >
+            {(provided, snapshot) => (
+             <div
+                  ref={provided.innerRef}
+                  style={getListStyle(snapshot.isDraggingOver)}
+                  {...provided.droppableProps}
+              >
+                {pending.map((item, index) => (
+                    <Draggable key={item._id} draggableId={item._id} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+                            {item.content}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newState = [...state];
+                                // newState[ind].splice(index, 1);
+                                setState(newState.filter(group => group.length));
+                              }}
+                            >
+                              complete
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+
+              </div>
+            )}
+          </Droppable>
         </DragDropContext>
       </div>
     </div>
