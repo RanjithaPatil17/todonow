@@ -1,6 +1,5 @@
 import { Component } from "react";
 
-import UserService from "../services/user.service";
 import EventBus from "../common/EventBus";
 import Board, {Item} from "./todo/board";
 import TodoService from "../services/todo.service";

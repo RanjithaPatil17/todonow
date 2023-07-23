@@ -8,7 +8,6 @@ import IUser from './types/user.type';
 
 import Login from "./components/login.component";
 import Register from "./components/register.component";
-import Home from "./components/home.component";
 import BoardUser from "./components/board-user.component"
 import EventBus from "./common/EventBus";
 
@@ -57,9 +56,6 @@ class App extends Component<Props, State> {
     return (
       <div>
         <nav className="navbar navbar-expand navbar-dark bg-dark">
-          <Link to={"/"} className="navbar-brand">
-            TodoNow
-          </Link>
           <div className="navbar-nav mr-auto">
             {currentUser && (
               <li className="nav-item">
@@ -74,7 +70,7 @@ class App extends Component<Props, State> {
             <div className="navbar-nav ml-auto">
               <li className="nav-item">
                 <a href="/login" className="nav-link" onClick={this.logOut}>
-                  LogOut
+                  Log out
                 </a>
               </li>
             </div>
@@ -97,15 +93,15 @@ class App extends Component<Props, State> {
 
         <div className="container mt-3">
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/home" element={<Home />} />
+            <Route path="/" element={<BoardUser />} />
+            <Route path="/home" element={<BoardUser />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/todos" element={<BoardUser />} />
           </Routes>
         </div>
 
-        { /*<AuthVerify logOut={this.logOut}/> */}
+        {/*<AuthVerify logOut={this.logOut}/> */}
       </div>
     );
   }
