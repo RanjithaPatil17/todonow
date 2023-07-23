@@ -29,6 +29,7 @@ const getItemStyle = (
 
 const getListStyle = (isDraggingOver: boolean): React.CSSProperties => ({
   background: isDraggingOver ? "lightblue" : "",
+  minHeight: "500px",
   padding: grid,
   // width: 600,
 });
@@ -38,6 +39,7 @@ type Props = {
   PendingItems: Item[];
   New: (params: any) => any;
   Update: (id: string, index: any, destination: any) => any;
+  Delete: (id: string) => any;
 };
 
 // const TasksColumn: FC<ChildProps> = ({ Name }): ReactElement =>
@@ -46,6 +48,7 @@ const Board: FC<Props> = ({
   PendingItems,
   New,
   Update,
+  Delete,
 }): ReactElement => {
   const [state, setState] = useState<Item[][]>([]);
   const [completed, setCompleted] = useState<Item[]>([]);
@@ -66,6 +69,10 @@ const Board: FC<Props> = ({
     if (!destination) {
       return;
     }
+    if (destination.droppableId === "delete") {
+      Delete(result.draggableId);
+      return;
+    }
     var dstIndex = destination.index;
     var destinationId = destination.droppableId;
     Update(result.draggableId, dstIndex, destinationId);
@@ -75,42 +82,33 @@ const Board: FC<Props> = ({
     <div className="container">
       <div className="row">
         <div className="col-3">
-          <button type="button" onClick={() => setIsDialogOpen(true)}>
-            Add new item
-          </button>
+          <div className="input-group mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Add new task"
+              onChange={(e) => {
+                setInputText(e.target.value);
+              }}
+              value={inputText}
+            />
+            <button
+              className="btn btn-outline-secondary"
+              type="button"
+              id="button-addon2"
+              onClick={() => {
+                if (inputText.length > 0) {
+                  New(inputText);
+                  setInputText("");
+                }
+              }}
+            >
+              New
+            </button>
+          </div>
         </div>
-        <ReactModal
-          isOpen={isDialogOpen}
-          onRequestClose={() => setIsDialogOpen(false)}
-          contentLabel="Example Modal"
-        >
-          <h2>Add new item</h2>
-          <input
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-          />
-          <button
-            type="button"
-            onClick={() => {
-              // Handle dialog box submission here
-              // You can access the input text using `inputText` state
-              // Do any processing or actions based on the user input
-              console.log("User input:", inputText);
-              New(inputText);
-              setInputText("");
-              // Close the dialog box after handling the input
 
-              setIsDialogOpen(false);
-            }}
-          >
-            Submit
-          </button>
-          <button type="button" onClick={() => setIsDialogOpen(false)}>
-            Cancel
-          </button>
-        </ReactModal>
-        <div className="col-7">
+        <div className="col-9">
           <div style={{ display: "flex" }}>
             <div className="container text-center">
               <DragDropContext onDragEnd={onDragEnd}>
@@ -123,6 +121,7 @@ const Board: FC<Props> = ({
                           style={getListStyle(snapshot.isDraggingOver)}
                           {...provided.droppableProps}
                         >
+                          Pending
                           {pending.map((item, index) => (
                             <Draggable
                               key={item._id}
@@ -160,6 +159,7 @@ const Board: FC<Props> = ({
                           style={getListStyle(snapshot.isDraggingOver)}
                           {...provided.droppableProps}
                         >
+                          Completed
                           {completed.map((item, index) => (
                             <Draggable
                               key={item._id}
@@ -185,6 +185,21 @@ const Board: FC<Props> = ({
                               )}
                             </Draggable>
                           ))}
+                        </div>
+                      )}
+                    </Droppable>
+                  </div>
+                  <div className="col">
+                    <Droppable key={"delete"} droppableId={"delete"}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          style={getListStyle(snapshot.isDraggingOver)}
+                          {...provided.droppableProps}
+                        >
+                            <div className={snapshot.isDraggingOver ? "image-container": ""}>
+                              <img src="https://img.icons8.com/ios/50/000000/delete-forever--v1.png" />
+                            </div>
                         </div>
                       )}
                     </Droppable>

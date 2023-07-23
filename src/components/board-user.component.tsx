@@ -22,8 +22,6 @@ export default class BoardUser extends Component<Props, State> {
     };
   }
 
-
-
   fetchTodoList() {
     TodoService.getTodoList().then(
       (response) => {
@@ -55,27 +53,28 @@ export default class BoardUser extends Component<Props, State> {
     );
   }
 
-    AddNew = (content :string) => {
+  AddNew = (content: string) => {
     TodoService.createTodo({
       content: content,
     }).then((resp) => {
       this.fetchTodoList();
-    }
-    );
-    }
-  
-  Update = (id: string, index: any, destination: any) => {
-    TodoService.updateTodo(
-      id,
-      {
-        index: index,
-        destination: destination,
-      },
-    ).then((resp) => {
+    });
+  };
+
+  Delete = (id: string) => {
+    TodoService.deleteTodo(id).then((resp) => {
       this.fetchTodoList();
-    }
-    );
-  }
+    });
+  };
+
+  Update = (id: string, index: any, destination: any) => {
+    TodoService.updateTodo(id, {
+      index: index,
+      destination: destination,
+    }).then((resp) => {
+      this.fetchTodoList();
+    });
+  };
   componentDidMount() {
     this.fetchTodoList();
   }
@@ -83,20 +82,17 @@ export default class BoardUser extends Component<Props, State> {
   render() {
     return (
       <div className="container text-center">
-        <div className="row align-items-start">
-          <div className="col">
-            <Board 
+        {/* <div className="row align-items-start"> */}
+          {/* <div className="col"> */}
+            <Board
               CompletedItems={this.state.completed}
               PendingItems={this.state.pending}
-              New={
-                this.AddNew
-            }
-              Update={
-                this.Update
-              }
+              New={this.AddNew}
+              Update={this.Update}
+              Delete={this.Delete}
             />
-            </div>
-        </div>
+          {/* </div> */}
+        {/* </div> */}
       </div>
     );
   }
