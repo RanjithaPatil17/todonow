@@ -7,6 +7,7 @@ import AuthService from "./services/auth.service";
 import IUser from './types/user.type';
 
 import Login from "./components/login.component";
+import Home from "./components/home";
 import Register from "./components/register.component";
 import BoardUser from "./components/board-user.component"
 import EventBus from "./common/EventBus";
@@ -93,7 +94,7 @@ class App extends Component<Props, State> {
 
         <div className="container mt-3">
           <Routes>
-            <Route path="/" element={<BoardUser />} />
+            <Route path="/" element={<Home />} />
             <Route path="/home" element={<BoardUser />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
